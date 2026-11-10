@@ -1,0 +1,36 @@
+name: Verify sample
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2025]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+        with:
+          global-json-file: global.json
+      - name: SDK and runtime versions
+        run: dotnet --info
+      - name: Locked restore
+        run: dotnet restore McpAuthorization.slnx --locked-mode
+      - name: Release build
+        run: dotnet build McpAuthorization.slnx --configuration Release --no-restore
+      - name: Integration tests
+        run: dotnet test McpAuthorization.slnx --configuration Release --no-build --logger "trx;LogFileName=protocol-tests.trx" --results-directory TestResults
+      - name: Framework-dependent publish
+        run: dotnet publish src/Server/Server.csproj --configuration Release --no-build --output artifacts/publish

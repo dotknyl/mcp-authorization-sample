@@ -1,0 +1,19 @@
+**/bin/
+**/obj/
+TestResults/
+artifacts/
+.vs/
+.vscode/
+.claude/
+*.user
+*.suo
+.env
+.env.*
+*.pfx
+*.p12
+*.key
+
+# Local editorial workspace: not part of this educational sample.
+/article-*.json
+/article-*.md
+/prepare-article-*.cjs
